@@ -10,5 +10,9 @@ jobs:
           python-version: "3.12"
       # every accuracy on the page must be re-derivable from the per-item records in results/
       - run: python scripts/check_readme_numbers.py
+      # the subset-representativeness tables must regenerate byte-identically from the records
+      - run: |
+          python scripts/representativeness.py
+          git diff --exit-code results/representativeness.json
       # and the summary must still run over those records
       - run: python scripts/taichu_summary.py

@@ -1,5 +1,6 @@
 """MathVista-style answer extraction with a local LLM (the official protocol uses GPT-4 with this few-shot
-prompt shape). Re-scores saved Taichu outputs from the tail of the response. argv: files..."""
+prompt shape). Re-scores saved Taichu outputs from the tail of the response. argv: files...
+"""
 
 import os as _os
 
@@ -83,7 +84,8 @@ llm = LLM(
 )
 tok = llm.get_tokenizer()
 for f in sys.argv[1:]:
-    rs = [json.loads(l) for l in open(f)]
+    with open(f) as fh:
+        rs = [json.loads(line) for line in fh]
     prompts = []
     for r in rs:
         it = meta[r["id"]]
@@ -120,7 +122,8 @@ for f in sys.argv[1:]:
         by[k][1] += 1
         r["llm_pred"] = pred
         r["llm_ok"] = bool(ok)
-    json.dump(rs, open(f.replace(".jsonl", "_llmext.json"), "w"))
+    with open(f.replace(".jsonl", "_llmext.json"), "w") as fh:
+        json.dump(rs, fh)
     print(
         f"### {os.path.basename(f)}: rule {100 * sum(r['ok'] for r in rs) / len(rs):.2f}% -> LLM-extracted {100 * n_ok / len(rs):.2f}%  "
         + " ".join(f"{k}={100 * v[0] / v[1]:.1f}%" for k, v in sorted(by.items())),

@@ -40,7 +40,20 @@ MODEL = glob.glob(f"{HUB}/models--TaichuAI--ZDTaichu5.0-9B/snapshots/*/")[0]
 IMG = f"{a.out}/img"
 os.makedirs(IMG, exist_ok=True)
 outf = f"{a.out}/{a.bench}{'_think_' + a.thinking if a.thinking != 'default' else ''}{'_sub' + str(a.subset) if a.subset else ''}{'_' + a.tag if a.tag else ''}{'_smoke' if a.limit else ''}.jsonl"
-done = {json.loads(l)["id"] for l in open(outf)} if os.path.exists(outf) else set()
+done = set()
+if os.path.exists(outf):
+    with open(outf) as fh:
+        done = {json.loads(line)["id"] for line in fh}
+
+
+def running_acc(path):
+    """Accuracy over everything written so far, in one pass over the file."""
+    hit = total = 0
+    with open(path) as fh:
+        for line in fh:
+            hit += json.loads(line)["ok"]
+            total += 1
+    return hit / max(1, total)
 
 
 def load_items():
@@ -153,6 +166,10 @@ for name, impl in ATTN.items():
     c = cfg if name == "" else getattr(cfg, name, None)
     if c is None:
         continue
+    # transformers has renamed this field twice, and the shipped config classes accept a
+    # different subset of the three on each version, so set all three and let the ones this
+    # version rejects raise. Writing only the attributes that already exist is not the same
+    # thing: on some versions the field this loop has to create is the one that is read.
     for k in (
         "_attn_implementation",
         "attn_implementation",
@@ -160,7 +177,7 @@ for name, impl in ATTN.items():
     ):
         try:
             setattr(c, k, impl)
-        except Exception:
+        except (AttributeError, TypeError, ValueError):
             pass
 model = cls.from_pretrained(
     MODEL,
@@ -267,7 +284,7 @@ with open(outf, "a") as fh:
         n += 1
         if n % 25 == 0 or n == len(items):
             print(
-                f"  {n}/{len(items)}  {(time.time() - t0) / n:.1f}s/item  acc so far {sum(json.loads(l)['ok'] for l in open(outf)) / max(1, sum(1 for _ in open(outf))):.3f}",
+                f"  {n}/{len(items)}  {(time.time() - t0) / n:.1f}s/item  acc so far {running_acc(outf):.3f}",
                 flush=True,
             )
 print("EVAL_DONE", flush=True)

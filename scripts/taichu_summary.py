@@ -46,10 +46,11 @@ for mode in ["off", "on_sub150"]:
     s3 = [r for r in rs if r["split"] == "test_3d"]
     a2 = sum(r["ok"] for r in s2) / max(1, len(s2))
     a3 = sum(r["ok"] for r in s3) / max(1, len(s3))
-    srcacc = lambda name: (
-        sum(r["ok"] for r in rs if r["source"] == name)
-        / max(1, sum(1 for r in rs if r["source"] == name))
-    )
+
+    def srcacc(name, rows=rs):
+        hit = [r["ok"] for r in rows if r["source"] == name]
+        return sum(hit) / max(1, len(hit))
+
     a2c = (srcacc("ADE20K") + srcacc("COCO")) / 2
     print(
         f"  overall {acc(rs)}   2D {acc(s2)}   3D {acc(s3)}   Cambrian-style: 2D=(ADE+COCO)/2={100 * a2c:.2f}%, overall=(2D+3D)/2={100 * (a2c + a3) / 2:.2f}%"

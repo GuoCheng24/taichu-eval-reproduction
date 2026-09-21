@@ -71,7 +71,8 @@ def correct(it, pred):
 
 
 for f in sys.argv[1:]:
-    rs = [json.loads(l) for l in open(f)]
+    with open(f) as fh:
+        rs = [json.loads(line) for line in fh]
     old = sum(r["ok"] for r in rs)
     new = 0
     by = collections.defaultdict(lambda: [0, 0])
