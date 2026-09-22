@@ -257,7 +257,7 @@ def main() -> int:
         for k, e in r["estimators"].items():
             print(
                 f"      {k:<16}{e['value']:>7.2f}%  se {e['se']:>4.2f}  "
-                f"CI {str(e['ci']):>16}  bootstrap {str(e['bootstrap_ci']):>16}  "
+                f"CI {e['ci']!s:>16}  bootstrap {e['bootstrap_ci']!s:>16}  "
                 f"{'contains the card' if e['contains_card'] else 'EXCLUDES THE CARD'}"
             )
         print(
