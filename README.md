@@ -13,6 +13,11 @@ under any reading:** the same four estimates span 77.20% to 82.00% against 84.50
 this page does not claim they do. Off the card's protocol both numbers are far lower, and that part
 of the gap is the protocol rather than the weights.
 
+
+> **On machine names.** `prereg/PREREG_budget.md` names the cluster nodes its
+> arms ran on. It is sealed and is not edited after the fact; elsewhere in this
+> repository machines are referred to neutrally.
+
 ## Numbers
 
 | benchmark | setting | items | accuracy | 95% CI | card |
