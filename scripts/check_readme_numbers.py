@@ -180,6 +180,78 @@ def main() -> int:
         if not ok:
             failures.append(label)
 
+    # Figures the page states that no earlier version of this file touched. A fresh-eyes audit
+    # on a different model passed a README with eight of them falsified -- McNemar p 0.064 as
+    # 0.640, the paired gain +6.00 as +60.0 -- and this script printed "every number on the page
+    # is re-derived from results/" and exited 0.
+    by_task = {}
+    for r in cv_off:
+        by_task.setdefault((r["source"], r["task"]), []).append(r["ok"])
+    for (src, task), v in by_task.items():
+        scores.append(
+            (f"CV-Bench {src} {task}, all items", 100 * sum(v) / len(v), None)
+        )
+
+    sub_off = {r["id"]: r["ok"] for r in cv_off}
+    sub_task = {}
+    for r in cv_on:
+        k = (r["source"], r["task"])
+        sub_task.setdefault(k, [0, 0, 0])
+        sub_task[k][0] += sub_off[r["id"]]
+        sub_task[k][1] += r["ok"]
+        sub_task[k][2] += 1
+
+    tok = [r["ntok"] for r in mv_on]
+    capped = sum(1 for t in tok if t >= 3072)
+    unclosed = sum(1 for r in mv_on if not r["thought"])
+    extras = [
+        ("MathVista thinking-on mean tokens", sum(tok) / len(tok), "1,398"),
+        ("MathVista items at the cap", capped, "14"),
+        ("MathVista unclosed reasoning blocks", unclosed, "11"),
+        (
+            "CV-Bench subsample ADE20K Count, thinking off",
+            100 * sub_task[("ADE20K", "Count")][0] / sub_task[("ADE20K", "Count")][2],
+            "50.00",
+        ),
+        (
+            "CV-Bench subsample ADE20K Count, thinking on",
+            100 * sub_task[("ADE20K", "Count")][1] / sub_task[("ADE20K", "Count")][2],
+            "66.67",
+        ),
+        (
+            "CV-Bench subsample COCO Count, both arms",
+            100 * sub_task[("COCO", "Count")][0] / sub_task[("COCO", "Count")][2],
+            "91.30",
+        ),
+    ]
+    for label, got, written in extras:
+        if written is None:
+            continue
+        places = len(written.split(".")[1]) if "." in written else 0
+        got_r = (
+            f"{round(got, places):,.{places}f}"
+            if "," in written
+            else f"{round(got, places):.{places}f}"
+        )
+        on_page = (
+            re.search(r"(?<![\d.])" + re.escape(written) + r"(?![\d])", readme)
+            is not None
+        )
+        ok = got_r == written and on_page
+        print(
+            f"  {label:<48} page {written:>7}  results {got_r:>7}  "
+            f"{'ok' if ok else ('MISMATCH' if got_r != written else 'NOT ON PAGE')}"
+        )
+        if not ok:
+            failures.append(label)
+
+    # COCO Count must not be described as moving: both arms are equal on the subsample
+    a, b, n = sub_task[("COCO", "Count")]
+    if a == b and re.search(r"COCO Count to 91\.3", readme):
+        failures.append(
+            "the page says thinking moves COCO Count, and on the subsample it does not"
+        )
+
     fresh = representativeness.compute()
     if load("representativeness.json") != fresh:
         print(
@@ -188,6 +260,44 @@ def main() -> int:
         return 1
 
     # ---- the two tables, cell by cell ----
+    # Sentence-anchored, because a bare number search is satisfied by the same digits elsewhere:
+    # replaying the audit's falsifications, three of eight were caught and five walked through,
+    # including McNemar p 0.064 -> 0.640 and the paired gain +6.00 -> +60.0.
+    sentences = [
+        (
+            "CV-Bench McNemar in prose",
+            f"McNemar exact p = {fresh['cvbench']['mcnemar_p']:.3f}",
+        ),
+        (
+            "MathVista McNemar in prose",
+            f"McNemar exact p = {fresh['mathvista']['mcnemar_p']:.2f}",
+        ),
+        (
+            "CV-Bench paired gain in prose",
+            f"is +{fresh['cvbench']['paired_gain']:.2f} points",
+        ),
+        (
+            "ADE20K Count, both arms on the subsample",
+            f"{100 * sub_task[('ADE20K', 'Count')][0] / sub_task[('ADE20K', 'Count')][2]:.2f}% to "
+            f"{100 * sub_task[('ADE20K', 'Count')][1] / sub_task[('ADE20K', 'Count')][2]:.2f}%",
+        ),
+        (
+            "COCO Count, unchanged by thinking",
+            f"{100 * sub_task[('COCO', 'Count')][0] / sub_task[('COCO', 'Count')][2]:.2f}% with "
+            "thinking off",
+        ),
+        ("tokens and the cap", f"averages {sum(tok) / len(tok):,.0f} tokens per item"),
+        (
+            "how many of the capped never closed",
+            f"{capped} of 100 hit the 3,072 cap, and {unclosed} of those never closed the block",
+        ),
+    ]
+    for label, phrase in sentences:
+        ok = phrase in readme
+        print(f"  sentence  {label:<44} {'ok' if ok else 'NOT ON PAGE'}")
+        if not ok:
+            failures.append(f"{label}: the page does not say {phrase!r}")
+
     page_sub = parse_subsample_table(readme)
     page_est = parse_estimator_table(readme)
     for key, r in fresh.items():

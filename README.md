@@ -28,8 +28,11 @@ ones on this page and they ignore what thinking off already measured on every it
 below uses that and narrows them.
 
 CV-Bench by task (thinking off, all items): ADE20K Count 54.97%, ADE20K Relation 90.38%, COCO Count 75.56%,
-COCO Relation 95.82%, Omni3D Depth 92.67%, Omni3D Distance 81.17%. Counting is where thinking pays: on the
-150-item subset it moves ADE20K Count from the fifties to 66.7% and COCO Count to 91.3%.
+COCO Relation 95.82%, Omni3D Depth 92.67%, Omni3D Distance 81.17%. On the 150-item subset, paired, thinking mode's +6.00-point gain comes from Omni3D Distance
+(+4 of 41) and ADE20K Count (+3 of 18, 50.00% to 66.67%). It moves COCO Count by **nothing**:
+91.30% with thinking off and 91.30% with it on, one item fixed and one broken. An earlier version
+of this line read "counting is where thinking pays", which the per-task decomposition does not
+support.
 
 MathVista with the rule-based extractor instead of the LLM one: 54.30% / 60.40% / 52.00% for the three rows
 above. The model answers with a derivation and the answer is often not the last number, so a regex reads it
@@ -69,12 +72,20 @@ thinking-on accuracy, the subsample correlated with its auxiliary at rho = 0.48 
 | **regression — least-squares coefficient** | **88.98% ± 2.15, [84.8, 93.2]** | **79.75% ± 3.16, [73.6, 85.9]** |
 | post-stratified — by what thinking off got right | 88.98% ± 2.26, [84.5, 93.4] | 79.75% ± 3.60, [72.7, 86.8] |
 
-Read the regression row if you read one: it has the smallest standard error of the four, and it is
-what the auxiliary variable is for. The difference estimator is the same thing with the coefficient
-forced to 1, which is right only when the arms are strongly correlated; at rho ~ 0.5 the
-least-squares coefficient is 0.40 and 0.47, so forcing 1 over-corrects — that row is the least
-precise of the four and the furthest from the card. Percentile bootstrap intervals over 4,000
-resamples of the subsample agree with all four analytic ones to within 1.1 points.
+Four rows, three estimators. With a binary auxiliary the regression and post-stratified
+estimators are algebraically the same thing — identical point estimates and identical bootstrap
+intervals, differing only in which analytic variance formula is used — and the table keeps both
+rows because their standard errors are derived differently, not because they are separate
+readings.
+
+Read the regression row if you read one: it has the smallest standard error, and it is what the
+auxiliary variable is for. The difference estimator is the same thing with the coefficient forced
+to 1, which is right only when the arms are strongly correlated; at rho ~ 0.5 the least-squares
+coefficient is 0.40 and 0.47, so forcing 1 over-corrects, and it is the least precise row in both
+benchmarks. It is also the furthest from the card on MathVista — but the *closest* on CV-Bench
+(1.63 points against 2.16 and 2.51), so over-correction moves it away from the card only where the
+card sits above the estimates. The least-squares coefficient is 0.40 and 0.47. Percentile bootstrap
+intervals over 4,000 resamples agree with all four analytic ones to within 1.1 points.
 
 The conclusion is the same in every row, which is the point of printing all four: CV-Bench above
 the card and MathVista below it, with the card inside every interval. What a larger thinking-on
@@ -90,13 +101,21 @@ holds them, and `scripts/check_readme_numbers.py` fails if the page and that fil
   intervals. The subsample they rest on is representative (+0.94 points, p = 0.77) and the paired
   thinking-mode gain that carries them is +6.00 points (McNemar exact p = 0.064). The full-set
   thinking-off number, 82.42%, is a different protocol and should not be read against the card.
-- **MathVista: not excluded, not reached.** All four estimates — 77.20% to 82.00% — are below
-  84.50, by 2.50 to 7.30 points, and 84.50 is inside all four intervals. Two things keep this
+- **MathVista: not excluded, not reached — and that verdict turns on eleven items.** All four
+  estimates — 77.20% to 82.00% — are below 84.50, by 2.50 to 7.30 points, and 84.50 is inside all
+  four intervals. But **11 of the 100 thinking-on items never closed their reasoning block**, all
+  of them at the 3,072-token cap, so there was no answer to extract; the LLM extractor read the
+  tail of an unfinished trace and credited 5 of the 11 as correct. Score those 11 as no-answer and
+  the estimates fall to 72.20–77.00% and **three of the four intervals stop containing 84.50**
+  (`results/unclosed_sensitivity.json`). Neither scoring is obviously right — a truncated trace is
+  not a wrong answer, and it is not a right one either — so the honest statement is that this
+  benchmark's verdict is not robust to how eleven truncated generations are counted, and a larger
+  token budget, not a larger sample, is what would settle it. Two things keep this
   weak in both directions: the paired gain is +4.00 points but is not distinguishable from zero on
   100 items (McNemar exact p = 0.45), and the draw is 5.33 points easy, which is why the
   unadjusted 82.00% sits closest to the card and the adjusted estimates sit further from it. The
-  subsample is small because thinking-on generation averages 1,400 tokens per item (14 of 100 hit
-  the 3,072 cap) and this is one shared GPU.
+  subsample is small because thinking-on generation averages 1,398 tokens per item
+  (14 of 100 hit the 3,072 cap, and 11 of those never closed the block) and this is one shared GPU.
 - Not established: the card's exact prompts, budgets and extractor. The comparison is "does the
   number survive an independent run of the standard protocol", not "is it bit-exact". A larger
   thinking-on MathVista sample would narrow the interval; it is the one thing 100 items cannot do.

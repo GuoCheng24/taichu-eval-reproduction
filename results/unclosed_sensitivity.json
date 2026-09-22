@@ -1,0 +1,45 @@
+{
+  "estimators_unclosed_as_wrong": {
+    "difference": {
+      "ci": [
+        64.1,
+        80.3
+      ],
+      "contains_card": false,
+      "value": 72.2
+    },
+    "direct": {
+      "ci": [
+        69.1,
+        84.9
+      ],
+      "contains_card": true,
+      "value": 77.0
+    },
+    "post_stratified": {
+      "ci": [
+        67.0,
+        82.5
+      ],
+      "contains_card": false,
+      "value": 74.78
+    },
+    "regression": {
+      "ci": [
+        67.8,
+        81.8
+      ],
+      "contains_card": false,
+      "value": 74.78
+    }
+  },
+  "ids_credited": [
+    "546",
+    "318",
+    "921",
+    "848",
+    "228"
+  ],
+  "n_unclosed": 11,
+  "n_unclosed_credited": 5
+}
