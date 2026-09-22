@@ -4,12 +4,14 @@ Re-measuring two model-card numbers of [ZDTaichu5.0-9B](https://huggingface.co/T
 (Zidong Taichu 5.0, a Qwen3.5 hybrid GatedDeltaNet decoder with a C-RADIOv4-H vision tower) on one RTX 4090:
 **CV-Bench** (card: 86.82) and **MathVista testmini** (card: 84.50).
 
-On the card's protocol — thinking mode on, answers extracted by an LLM — the two numbers come out differently.
-**CV-Bench reproduces:** carrying the paired thinking-mode gain onto the full set gives 88.45% [82.6, 94.3],
-which contains 86.82. **MathVista does not reproduce at the point estimate:** the same construction gives
-77.20% [68.9, 85.5] against a card value of 84.50, so the card is not excluded but sits 7.30 points above the
-estimate, near the top of the interval. Off the card's protocol both are far lower, and that part of the gap
-is the protocol rather than the weights.
+On the card's protocol — thinking mode on, answers extracted by an LLM — the two come out
+differently. **CV-Bench reproduces, and slightly high:** every way of reading the thinking-on
+subsample puts the full set at 88.45% to 89.33%, which is 1.63 to 2.51 points *above* the card's
+86.82, with 86.82 inside every interval. **MathVista is not excluded, and does not reach the card
+under any reading:** the same four estimates span 77.20% to 82.00% against 84.50 — short by 2.50 to
+7.30 points — and 84.50 lies inside all four intervals. One hundred items cannot settle that, and
+this page does not claim they do. Off the card's protocol both numbers are far lower, and that part
+of the gap is the protocol rather than the weights.
 
 ## Numbers
 
@@ -21,9 +23,9 @@ is the protocol rather than the weights.
 | MathVista testmini | thinking off, 2,048 tokens, LLM-extracted | 1,000 (all) | 73.20% | [70.4, 75.9] | 84.50 |
 | MathVista testmini, same items, paired | thinking off 2,048 / **thinking on** 3,072, LLM-extracted | 100 (fixed random subset) | 78.0% / **82.0%** | [73.3, 88.3] for thinking on | 84.50 |
 
-The two subset rows are not full-set numbers and neither belongs next to the card on its own: the
-MathVista subset turns out to run 5.33 points easier than the rest of the benchmark. The section
-below measures that and says what is left standing once it is accounted for.
+The two subsample rows are unbiased estimates of the full-set numbers, but they are the widest
+ones on this page and they ignore what thinking off already measured on every item. The section
+below uses that and narrows them.
 
 CV-Bench by task (thinking off, all items): ADE20K Count 54.97%, ADE20K Relation 90.38%, COCO Count 75.56%,
 COCO Relation 95.82%, Omni3D Depth 92.67%, Omni3D Distance 81.17%. Counting is where thinking pays: on the
@@ -34,57 +36,70 @@ above. The model answers with a derivation and the answer is often not the last 
 wrong; the official protocol uses GPT-4 to extract the answer, and a local Qwen2.5-7B-Instruct with the same
 few-shot prompt shape closes most of that gap. Everything here is greedy decoding.
 
-## Is the thinking-on subset representative?
+## Reading a subsample against a card number
 
-Thinking mode was affordable on a subset only, so the two thinking-on rows rest on 150 and 100 items. A
-thinking-on number read off a subset means nothing unless that subset is as hard as the benchmark it stands
-for. Scoring the *same* subsets under thinking **off**, where the full set was also measured, answers that
-directly (per-item accounting throughout; the 82.42% in the table is the Cambrian mean-of-means, 82.45% here
-is the plain per-item rate over the same 2,638 records):
+Thinking mode was affordable on 150 CV-Bench items and 100 MathVista items, drawn uniformly at
+random (`rng.sample`, seed 0). Two facts about that pull in opposite directions and are easy to
+run together:
 
-| benchmark | subset, thinking off | remaining items, thinking off | subset is easier by | p |
+- A uniform subsample mean is an **unbiased** estimate of the full-set accuracy. "82.0% on 100
+  items, and 84.50 is inside its interval" is a valid statement. An earlier version of this page
+  said the subsample figure could not be read as a full-set number; that was wrong, and this
+  section replaces it.
+- This particular draw is **easy**. Under thinking off — the protocol both arms share, and the one
+  measured on every item of both full sets — the MathVista 100 score 5.33 points above the other
+  900, and the CV-Bench 150 score 0.94 points above the other 2,488:
+
+| benchmark | subsample, thinking off | the rest, thinking off | subsample easier by | p |
 |---|---|---|---|---|
-| CV-Bench | 83.33% (150) | 82.40% (2,488) | **+0.94 points** | 0.77 |
-| MathVista | 78.00% (100) | 72.67% (900) | **+5.33 points** | 0.25 |
+| CV-Bench | 83.33% (150) | 82.40% (2,488) | +0.94 points | 0.77 |
+| MathVista | 78.00% (100) | 72.67% (900) | +5.33 points | 0.25 |
 
-The CV-Bench subset is representative. **The MathVista subset is not:** it runs 5.33 points easier than the
-rest of the benchmark. That is inside sampling noise for n = 100 (p = 0.25, and the draw was a fixed seed, not
-a selection), but it is larger than the effect being measured, so the 82.0% on that subset cannot be read as a
-full-set number.
+Neither gap is significant — a random draw of 100 does that — so neither is evidence of a broken
+sample. But the thinking-off arm is a **census** of both full sets — 82.45% over all 2,638 CV-Bench
+items and 73.20% over all 1,000 MathVista items, per item in both cases — so it is an auxiliary
+variable known for every item, and using it is free precision. Four standard estimates of the full-set
+thinking-on accuracy, the subsample correlated with its auxiliary at rho = 0.48 (CV-Bench) and
+0.51 (MathVista), with the finite-population correction applied:
 
-What survives the check is the *paired* gain, which is immune to subset difficulty because both arms see the
-same items, plus the full-set thinking-off number to carry it onto:
+| estimator | CV-Bench (card 86.82) | MathVista (card 84.50) |
+|---|---|---|
+| direct — the subsample mean | 89.33% ± 2.46, [84.5, 94.1] | 82.00% ± 3.66, [74.8, 89.2] |
+| difference — full-set off plus the paired gain | 88.45% ± 2.79, [83.0, 93.9] | 77.20% ± 3.79, [69.8, 84.6] |
+| **regression — least-squares coefficient** | **88.98% ± 2.15, [84.8, 93.2]** | **79.75% ± 3.16, [73.6, 85.9]** |
+| post-stratified — by what thinking off got right | 88.98% ± 2.26, [84.5, 93.4] | 79.75% ± 3.60, [72.7, 86.8] |
 
-| benchmark | paired gain, on − off | 95% CI | McNemar (exact) | full set, off | **full set, on (estimated)** | card |
-|---|---|---|---|---|---|---|
-| CV-Bench | +6.00 points | [0.37, 11.63] | b=14, c=5, p=0.064 | 82.45% | **88.45% [82.6, 94.3]** | 86.82 |
-| MathVista | +4.00 points | [−3.84, 11.84] | b=10, c=6, p=0.45 | 73.20% | **77.20% [68.9, 85.5]** | 84.50 |
+Read the regression row if you read one: it has the smallest standard error of the four, and it is
+what the auxiliary variable is for. The difference estimator is the same thing with the coefficient
+forced to 1, which is right only when the arms are strongly correlated; at rho ~ 0.5 the
+least-squares coefficient is 0.40 and 0.47, so forcing 1 over-corrects — that row is the least
+precise of the four and the furthest from the card. Percentile bootstrap intervals over 4,000
+resamples of the subsample agree with all four analytic ones to within 1.1 points.
 
-The CV-Bench projection is carried onto the per-item full-set rate, 82.45%, while the card's 86.82 is
-presumably in the Cambrian mean-of-means accounting, which gives 82.42% on the same records. The two
-differ by 0.03 points here, far inside the interval, but they are not the same quantity.
-The projected interval is the full-set thinking-off standard error and the paired-difference
-standard error combined in quadrature. Those two are not strictly independent, since the subset is
-part of the full set, but at 150 of 2,638 and 100 of 1,000 the overlap term is small.
-`scripts/check_readme_numbers.py` re-derives every figure in both tables from `results/`, and
-`results/representativeness.json` holds them.
+The conclusion is the same in every row, which is the point of printing all four: CV-Bench above
+the card and MathVista below it, with the card inside every interval. What a larger thinking-on
+sample would buy is precision, not a different sign.
+
+`scripts/representativeness.py` derives every figure above, `results/representativeness.json`
+holds them, and `scripts/check_readme_numbers.py` fails if the page and that file disagree.
 
 ## What is and is not established
 
-- **CV-Bench: reproduced.** The estimated full-set thinking-on accuracy, 88.45% [82.6, 94.3], contains the
-  card's 86.82. The paired gain that carries it is +6.00 points, marginal on its own (p = 0.064), and the
-  subset it was measured on is representative (+0.94 points). The full-set thinking-off number, 82.42%, is a
-  different protocol and should not be read against the card.
-- **MathVista: not reproduced at the point estimate, not excluded either.** The estimate is 77.20%
-  [68.9, 85.5] against a card value of 84.50. Two things keep this weak in both directions: the thinking-on
-  gain is +4.00 points but is not distinguishable from zero on 100 items (p = 0.45), and the subset is 5.33
-  points easier than the rest of the benchmark, which is what puts the raw 82.0% so close to the card. Reading
-  "82.0% [73.3, 88.3] contains 84.50" as a reproduction would be reading the subset's luck as the model's
-  accuracy. The subset is small because thinking-on generation averages 1,400 tokens per item (14 of 100 hit
+- **CV-Bench: reproduced.** All four estimates of the full-set thinking-on accuracy — 88.45% to
+  89.33% — are above the card's 86.82, by 1.63 to 2.51 points, and 86.82 is inside all four
+  intervals. The subsample they rest on is representative (+0.94 points, p = 0.77) and the paired
+  thinking-mode gain that carries them is +6.00 points (McNemar exact p = 0.064). The full-set
+  thinking-off number, 82.42%, is a different protocol and should not be read against the card.
+- **MathVista: not excluded, not reached.** All four estimates — 77.20% to 82.00% — are below
+  84.50, by 2.50 to 7.30 points, and 84.50 is inside all four intervals. Two things keep this
+  weak in both directions: the paired gain is +4.00 points but is not distinguishable from zero on
+  100 items (McNemar exact p = 0.45), and the draw is 5.33 points easy, which is why the
+  unadjusted 82.00% sits closest to the card and the adjusted estimates sit further from it. The
+  subsample is small because thinking-on generation averages 1,400 tokens per item (14 of 100 hit
   the 3,072 cap) and this is one shared GPU.
-- Not established: the card's exact prompts, budgets and extractor. The comparison is "does the number survive
-  an independent run of the standard protocol", not "is it bit-exact". A larger thinking-on MathVista sample
-  would settle the MathVista row; 100 items cannot.
+- Not established: the card's exact prompts, budgets and extractor. The comparison is "does the
+  number survive an independent run of the standard protocol", not "is it bit-exact". A larger
+  thinking-on MathVista sample would narrow the interval; it is the one thing 100 items cannot do.
 
 ## Running it
 
@@ -98,8 +113,8 @@ python scripts/taichu_eval.py --bench mathvista --thinking on  --max_new 3072 --
 python scripts/llm_extract.py results/mathvista_think_off.jsonl \
                              results/mathvista_think_off_b2048.jsonl \
                              results/mathvista_think_on_sub100.jsonl
-python scripts/taichu_summary.py                  # the first table
-python scripts/representativeness.py              # the other two
+python scripts/taichu_summary.py                  # the Numbers table
+python scripts/representativeness.py              # the subsample and estimator tables
 ```
 
 Three things the shipped model code needed on transformers 5.16: `_keys_to_ignore_on_load_unexpected` is a

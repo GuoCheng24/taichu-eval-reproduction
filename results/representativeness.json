@@ -1,5 +1,64 @@
 {
   "cvbench": {
+    "break_rate_on_items_off_got_right": 4.0,
+    "card": 86.82,
+    "correlation": 0.483,
+    "estimators": {
+      "difference": {
+        "bootstrap_ci": [
+          83.1,
+          93.8
+        ],
+        "ci": [
+          83.0,
+          93.9
+        ],
+        "contains_card": true,
+        "se": 2.79,
+        "value": 88.45
+      },
+      "direct": {
+        "bootstrap_ci": [
+          84.0,
+          94.0
+        ],
+        "ci": [
+          84.5,
+          94.1
+        ],
+        "contains_card": true,
+        "se": 2.46,
+        "value": 89.33
+      },
+      "post_stratified": {
+        "bootstrap_ci": [
+          84.3,
+          93.3
+        ],
+        "ci": [
+          84.5,
+          93.4
+        ],
+        "contains_card": true,
+        "se": 2.26,
+        "value": 88.98
+      },
+      "regression": {
+        "bootstrap_ci": [
+          84.3,
+          93.3
+        ],
+        "ci": [
+          84.8,
+          93.2
+        ],
+        "contains_card": true,
+        "se": 2.15,
+        "value": 88.98
+      }
+    },
+    "every_interval_contains_card": true,
+    "fix_rate_on_items_off_got_wrong": 56.0,
     "full_off": 82.45,
     "full_off_ci": [
       81.0,
@@ -8,25 +67,79 @@
     "mcnemar_b": 14,
     "mcnemar_c": 5,
     "mcnemar_p": 0.064,
+    "n_full": 2638,
     "n_rest": 2488,
     "n_subset": 150,
     "paired_gain": 6.0,
-    "paired_gain_ci": [
-      0.37,
-      11.63
-    ],
-    "projected_on": 88.45,
-    "projected_on_ci": [
-      82.6,
-      94.3
-    ],
+    "regression_coefficient": 0.4,
     "representativeness_p": 0.77,
     "rest_off": 82.4,
+    "shortfall_max": -1.63,
+    "shortfall_min": -2.51,
     "subset_easier_by": 0.94,
     "subset_off": 83.33,
     "subset_on": 89.33
   },
   "mathvista": {
+    "break_rate_on_items_off_got_right": 7.69,
+    "card": 84.5,
+    "correlation": 0.505,
+    "estimators": {
+      "difference": {
+        "bootstrap_ci": [
+          69.2,
+          85.2
+        ],
+        "ci": [
+          69.8,
+          84.6
+        ],
+        "contains_card": true,
+        "se": 3.79,
+        "value": 77.2
+      },
+      "direct": {
+        "bootstrap_ci": [
+          74.0,
+          89.0
+        ],
+        "ci": [
+          74.8,
+          89.2
+        ],
+        "contains_card": true,
+        "se": 3.66,
+        "value": 82.0
+      },
+      "post_stratified": {
+        "bootstrap_ci": [
+          72.6,
+          86.8
+        ],
+        "ci": [
+          72.7,
+          86.8
+        ],
+        "contains_card": true,
+        "se": 3.6,
+        "value": 79.75
+      },
+      "regression": {
+        "bootstrap_ci": [
+          72.6,
+          86.8
+        ],
+        "ci": [
+          73.6,
+          85.9
+        ],
+        "contains_card": true,
+        "se": 3.16,
+        "value": 79.75
+      }
+    },
+    "every_interval_contains_card": true,
+    "fix_rate_on_items_off_got_wrong": 45.45,
     "full_off": 73.2,
     "full_off_ci": [
       70.4,
@@ -35,20 +148,15 @@
     "mcnemar_b": 10,
     "mcnemar_c": 6,
     "mcnemar_p": 0.454,
+    "n_full": 1000,
     "n_rest": 900,
     "n_subset": 100,
     "paired_gain": 4.0,
-    "paired_gain_ci": [
-      -3.84,
-      11.84
-    ],
-    "projected_on": 77.2,
-    "projected_on_ci": [
-      68.9,
-      85.5
-    ],
+    "regression_coefficient": 0.469,
     "representativeness_p": 0.25,
     "rest_off": 72.67,
+    "shortfall_max": 7.3,
+    "shortfall_min": 2.5,
     "subset_easier_by": 5.33,
     "subset_off": 78.0,
     "subset_on": 82.0
