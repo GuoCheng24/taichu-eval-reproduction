@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If this was useful in your work, please cite it."
+title: "Reading a subsample against a model-card number: two ZDTaichu5.0-9B benchmarks re-measured on one GPU"
+abstract: "Two model-card numbers of ZDTaichu5.0-9B re-measured on a single RTX 4090 under the card's own protocol. Thinking mode was affordable on a uniform random subsample only, so four standard estimators of the full-set accuracy are reported rather than one: direct, difference, regression on the thinking-off census as an auxiliary variable, and post-stratified. CV-Bench lands 88.45 to 89.33 percent, above the card's 86.82; MathVista lands 77.20 to 82.00 percent, below the card's 84.50; every interval contains its card number. The subsample the thinking-on arm could afford runs 5.33 points easier than the rest of MathVista, which is why the estimator matters."
+type: software
+authors:
+  - family-names: Cheng
+    given-names: Guo
+    affiliation: "Hangzhou Institute of Medicine, Chinese Academy of Sciences, Hangzhou, China; Hangzhou Institute for Advanced Study, University of Chinese Academy of Sciences, Hangzhou, China"
+    orcid: "https://orcid.org/0009-0006-7813-0114"
+repository-code: "https://github.com/GuoCheng24/taichu-eval-reproduction"
+license: MIT
+version: 1.0.0
+date-released: 2026-09-22
+keywords:
+  - evaluation
+  - vision language models
+  - reproducibility
+  - survey sampling
+  - regression estimator
+  - subsampling
