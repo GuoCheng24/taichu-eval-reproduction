@@ -34,6 +34,15 @@ ap.add_argument("--tag", default="", help="suffix for the output file name")
 ap.add_argument("--out", default=_os.path.join(_ROOT, "results"))
 ap.add_argument("--max_new", type=int, default=0)
 ap.add_argument("--thinking", choices=["default", "off", "on"], default="default")
+ap.add_argument(
+    "--shard",
+    default="",
+    metavar="I/N",
+    help="evaluate only every Nth item starting at I, so one arm can be spread over several "
+         "idle GPUs. Each shard writes its own file (use --tag) and the shards are concatenated "
+         "afterwards. Decoding is one item at a time, so which GPU takes which item changes "
+         "nothing about the result - but the split is recorded rather than assumed harmless.",
+)
 a = ap.parse_args()
 HUB = os.path.expanduser("~/.cache/huggingface/hub")
 MODEL = glob.glob(f"{HUB}/models--TaichuAI--ZDTaichu5.0-9B/snapshots/*/")[0]
@@ -142,7 +151,22 @@ def score_mathvista(it, text):
         return pred.strip().lower() == str(it["answer"]).strip().lower(), pred
 
 
-items = [it for it in load_items() if it["id"] not in done]
+items = load_items()
+if a.shard:
+    try:
+        _i, _n = (int(x) for x in a.shard.split("/"))
+    except ValueError:
+        sys.exit(f"--shard wants I/N, got {a.shard!r}")
+    if not (_n >= 1 and 0 <= _i < _n):
+        sys.exit(f"--shard {a.shard}: need 0 <= I < N and N >= 1")
+    # Sliced BEFORE the already-done filter, so a shard owns the same items for
+    # the life of the run. Slicing the filtered list instead makes ownership
+    # depend on how far each shard happens to have got, and two shards restarted
+    # at different points then take the same item while another is taken by
+    # nobody.
+    items = items[_i::_n]
+    print(f"{a.bench}: shard {_i}/{_n}, {len(items)} items owned", flush=True)
+items = [it for it in items if it["id"] not in done]
 print(f"{a.bench}: {len(items)} to do ({len(done)} already)", flush=True)
 if not items:
     sys.exit()
