@@ -278,13 +278,17 @@ def main() -> int:
         ),
         (
             "ADE20K Count, both arms on the subsample",
-            f"{100 * sub_task[('ADE20K', 'Count')][0] / sub_task[('ADE20K', 'Count')][2]:.2f}% to "
-            f"{100 * sub_task[('ADE20K', 'Count')][1] / sub_task[('ADE20K', 'Count')][2]:.2f}%",
+            (
+                f"{100 * sub_task[('ADE20K', 'Count')][0] / sub_task[('ADE20K', 'Count')][2]:.2f}%"
+                f" to {100 * sub_task[('ADE20K', 'Count')][1] / sub_task[('ADE20K', 'Count')][2]:.2f}%"
+            ),
         ),
         (
             "COCO Count, unchanged by thinking",
-            f"{100 * sub_task[('COCO', 'Count')][0] / sub_task[('COCO', 'Count')][2]:.2f}% with "
-            "thinking off",
+            (
+                f"{100 * sub_task[('COCO', 'Count')][0] / sub_task[('COCO', 'Count')][2]:.2f}%"
+                " with thinking off"
+            ),
         ),
         ("tokens and the cap", f"averages {sum(tok) / len(tok):,.0f} tokens per item"),
         (
