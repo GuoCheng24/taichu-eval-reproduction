@@ -14,9 +14,12 @@ this page does not claim they do. Off the card's protocol both numbers are far l
 of the gap is the protocol rather than the weights.
 
 
-> **On machine names.** `prereg/PREREG_budget.md` names the cluster nodes its
-> arms ran on. It is sealed and is not edited after the fact; elsewhere in this
-> repository machines are referred to neutrally.
+> **On machine names.** Machines are referred to neutrally throughout. The
+> pre-registration was sealed before that decision, so removing the name from it
+> is a **redaction** and is recorded as one in
+> [`prereg/REDACTION.md`](prereg/REDACTION.md), with the hash it was sealed
+> under, the hash now, and the byte count showing the change is a same-length
+> substitution of one token and nothing else.
 
 ## Numbers
 

@@ -48,7 +48,7 @@ outcomes, written before any token of it is generated.
 | **T-A** | 3,072 | the published configuration, re-run here. The control for hardware and environment. |
 | **T-B** | 8,192 | the budget the README says would settle the question. |
 
-Both run on gpu-node-d, on separate idle L40s, greedy, no time cap.
+Both run on gpu-03, on separate idle L40s, greedy, no time cap.
 
 ## Pre-stated analysis
 
