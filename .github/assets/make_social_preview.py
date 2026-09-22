@@ -2,13 +2,12 @@
 
 The first version put its message in a block of 14 pt monospace. A social card is unfurled at about
 360 px wide in Slack, where that is grey noise, so the message is in the headline now and the
-terminal panel is texture beside it. Layout shared across this account via bin/lightcard.py, which
-refuses to emit a card whose left column runs under the panel.
+terminal panel is texture beside it. Layout in lightcard.py next to this file, which refuses to emit a card whose left column runs under the panel.
 """
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path.home() / "bin"))
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from lightcard import draw  # noqa: E402
 
 out = draw(
