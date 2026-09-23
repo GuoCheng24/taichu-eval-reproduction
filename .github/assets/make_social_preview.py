@@ -39,7 +39,9 @@ def chart(ax, accent):
     def X(v):
         return x0 + (x1 - x0) * (v - LO) / (HI - LO)
 
-    ax.plot([X(0), X(0)], [1.05, 3.50], color="#17181a", lw=3, zorder=2)
+    # the line stops clear of its own label: a vertical rule under text
+    # passed every check until the rule test learned about vertical rules
+    ax.plot([X(0), X(0)], [1.05, 3.34], color="#17181a", lw=3, zorder=2)
     ax.text(X(0), 3.62, "the card number", fontsize=34, color="#17181a", family=SANS,
             ha="center")
     for i, (name, vals, cardv) in enumerate(ROWS):
