@@ -1,0 +1,69 @@
+{
+ "benchmark": "cvbench",
+ "n": 2638,
+ "correct": 2302,
+ "accuracy_pct": 87.26307808946171,
+ "ci_pct": [
+  85.93046759499966,
+  88.51236407610834
+ ],
+ "card": 86.82,
+ "interval_contains_card": true,
+ "budget": 8192,
+ "unclosed": 0,
+ "at_cap": 0,
+ "estimators": {
+  "difference": {
+   "value": 88.45,
+   "ci": [
+    83.0,
+    93.9
+   ],
+   "signed_error": 1.1869219105382882,
+   "interval_contains_measured": true
+  },
+  "direct": {
+   "value": 89.33,
+   "ci": [
+    84.5,
+    94.1
+   ],
+   "signed_error": 2.0669219105382837,
+   "interval_contains_measured": true
+  },
+  "post_stratified": {
+   "value": 88.98,
+   "ci": [
+    84.5,
+    93.4
+   ],
+   "signed_error": 1.7169219105382894,
+   "interval_contains_measured": true
+  },
+  "regression": {
+   "value": 88.98,
+   "ci": [
+    84.8,
+    93.2
+   ],
+   "signed_error": 1.7169219105382894,
+   "interval_contains_measured": true
+  }
+ },
+ "estimators_containing_measured": 4,
+ "signed_error_range": [
+  1.1869219105382882,
+  2.0669219105382837
+ ],
+ "overlap": {
+  "n": 150,
+  "same_settings": false,
+  "tokens_identical": 149,
+  "outcome_identical": 150,
+  "shared_suffix_chars": 300,
+  "suffix_identical": 149,
+  "b": 0,
+  "c": 0,
+  "mcnemar_p": 1.0
+ }
+}

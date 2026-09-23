@@ -1,0 +1,30 @@
+{
+ "command": "python scripts/extractor_noise_probe.py results/mathvista_think_on_sub100.jsonl --order as-is",
+ "n": 10,
+ "metrics": [
+  {
+   "metric": "llm_extracted",
+   "min": 82.0,
+   "max": 82.0,
+   "spread": 0.0,
+   "distinct_values": 1,
+   "median": 82.0
+  },
+  {
+   "metric": "n_items",
+   "min": 100.0,
+   "max": 100.0,
+   "spread": 0.0,
+   "distinct_values": 1,
+   "median": 100.0
+  },
+  {
+   "metric": "rule",
+   "min": 52.0,
+   "max": 52.0,
+   "spread": 0.0,
+   "distinct_values": 1,
+   "median": 52.0
+  }
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "note": "What counts as private here, beyond the built-in patterns. Write each regex so that the literal it matches never appears in this file - a character class like /[p]ublic/ matches the same text without spelling it. That is not cosmetic: this file is committed, so a literal private prefix written here IS the leak, and the repository's own pre-commit scan is right to refuse it.",
+ "patterns": [
+  {
+   "regex": "\\bnode[0-9]{2}\\b",
+   "what": "a compute node name",
+   "why": "the cluster's node names were redacted from the sealed pre-registrations (prereg/REDACTION.md); reintroducing one anywhere else would undo that"
+  },
+  {
+   "regex": "/[p]ublic/[s]hare/[a-z]+/",
+   "what": "another user's directory on the shared filesystem",
+   "why": "paths under other accounts identify colleagues and their projects"
+  }
+ ]
+}
