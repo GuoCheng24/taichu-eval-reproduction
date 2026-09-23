@@ -1,17 +1,30 @@
 # taichu-eval-reproduction
 
 Re-measuring two model-card numbers of [ZDTaichu5.0-9B](https://huggingface.co/TaichuAI/ZDTaichu5.0-9B)
-(Zidong Taichu 5.0, a Qwen3.5 hybrid GatedDeltaNet decoder with a C-RADIOv4-H vision tower) on one RTX 4090:
+(Zidong Taichu 5.0, a Qwen3.5 hybrid GatedDeltaNet decoder with a C-RADIOv4-H vision tower), on
+RTX 4090s and L40s:
 **CV-Bench** (card: 86.82) and **MathVista testmini** (card: 84.50).
 
 On the card's protocol — thinking mode on, answers extracted by an LLM — the two come out
-differently. **CV-Bench reproduces, and slightly high:** every way of reading the thinking-on
-subsample puts the full set at 88.45% to 89.33%, which is 1.63 to 2.51 points *above* the card's
-86.82, with 86.82 inside every interval. **MathVista is not excluded, and does not reach the card
-under any reading:** the same four estimates span 77.20% to 82.00% against 84.50 — short by 2.50 to
-7.30 points — and 84.50 lies inside all four intervals. One hundred items cannot settle that, and
-this page does not claim they do. Off the card's protocol both numbers are far lower, and that part
-of the gap is the protocol rather than the weights.
+differently.
+
+**CV-Bench reproduces. Measured, not estimated:** all 2,638 items, thinking on, an 8,192-token
+budget, **87.26%** with an exact 95% interval of **[85.93, 88.51]** — and the card's 86.82 is inside
+it, +0.44 points away. That measurement supersedes the four estimates this page previously led
+with, which were estimates of exactly this quantity: their intervals all contain 87.26 and their
+point values are all **high**, by +1.19 to +2.07 points, which is what a subsample easier than the
+rest produces. No estimator is preferred retrospectively for having come closest. At this budget
+**0 of 2,638** reasoning blocks failed to close and **0** generations reached the cap, so there is
+one scoring rather than two.
+
+**MathVista is not excluded, and does not reach the card under any reading:** four estimates span
+77.20% to 82.00% against 84.50 — short by 2.50 to 7.30 points — and 84.50 lies inside all four
+intervals. One hundred items cannot settle that, and this page does not claim they do. **The
+full-set arm is running**; when it lands it will supersede these four the way the CV-Bench
+measurement superseded its own, whichever way it comes out.
+
+Off the card's protocol both numbers are far lower, and that part of the gap is the protocol rather
+than the weights.
 
 
 > **On machine names.** Machines are referred to neutrally throughout. The
@@ -27,6 +40,7 @@ of the gap is the protocol rather than the weights.
 |---|---|---|---|---|---|
 | CV-Bench, Cambrian-style overall = (mean(ADE20K, COCO) + Omni3D) / 2 | thinking off, 32-token budget | 2,638 (all) | 82.42% | [81.0, 83.9] (item-level) | 86.82 |
 | CV-Bench, same items, paired | thinking off / **thinking on**, 3,072-token budget | 150 (fixed random subset) | 83.33% / **89.33%** | [83.4, 93.3] for thinking on | 86.82 |
+| **CV-Bench, thinking on, full set** | **thinking on, 8,192-token budget** | **2,638 (all)** | **87.26%** | **[85.93, 88.51]** (Clopper–Pearson) | 86.82 |
 | MathVista testmini | thinking off, 512 tokens, LLM-extracted | 1,000 (all) | 66.70% | [63.7, 69.6] | 84.50 |
 | MathVista testmini | thinking off, 2,048 tokens, LLM-extracted | 1,000 (all) | 73.20% | [70.4, 75.9] | 84.50 |
 | MathVista testmini, same items, paired | thinking off 2,048 / **thinking on** 3,072, LLM-extracted | 100 (fixed random subset) | 78.0% / **82.0%** | [73.3, 88.3] for thinking on | 84.50 |

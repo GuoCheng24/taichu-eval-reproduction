@@ -23,6 +23,11 @@ def values(key):
     return sorted(e["value"] for e in D[key]["estimators"].values()), D[key]["card"]
 
 
+# CV-Bench is no longer estimated: the full set was generated and scored, so its
+# row is the measurement and its exact interval. MathVista's full-set arm is
+# still running, so that row is still the four estimators. Showing both as
+# estimators would be a card that disagrees with its own README.
+FULL_CV = json.loads((ROOT / "results/metrics_fullset_cvbench.json").read_text())
 ROWS = [("CV-Bench", *values("cvbench")), ("MathVista", *values("mathvista"))]
 LO, HI = -8.6, 6.4                       # points away from the card number, shared axis
 
@@ -46,28 +51,40 @@ def chart(ax, accent):
             ha="center")
     for i, (name, vals, cardv) in enumerate(ROWS):
         y = 2.80 - i * 1.12
-        above = min(vals) > cardv
-        colour = "#1a7f37" if above else "#bc4c00"
-        d = [v - cardv for v in vals]
-        ax.plot([X(min(d)), X(max(d))], [y, y], color=colour, lw=3, zorder=3, alpha=0.55)
-        ax.plot([X(v) for v in d], [y] * len(d), "o", ms=17, color=colour, zorder=4)
         ax.text(x0 - 0.24, y, name, fontsize=34, color="#17181a", family=SANS,
                 ha="right", va="center")
-        label = f"+{min(d):.1f} to +{max(d):.1f}" if above else f"{min(d):.1f} to {max(d):.1f}"
-        ax.text(X(max(max(d), 0)) + 0.30, y, label, fontsize=34, fontweight="bold",
+        if name == "CV-Bench":
+            point = FULL_CV["accuracy_pct"] - cardv
+            lo, hi = (v - cardv for v in FULL_CV["ci_pct"])
+            colour = "#1a7f37"
+            ax.plot([X(lo), X(hi)], [y, y], color=colour, lw=3, zorder=3, alpha=0.55)
+            ax.plot([X(point)], [y], "o", ms=22, color=colour, zorder=4)
+            label = f"+{point:.2f}"
+            right = max(hi, point, 0)
+        else:
+            above = min(vals) > cardv
+            colour = "#1a7f37" if above else "#bc4c00"
+            d = [v - cardv for v in vals]
+            ax.plot([X(min(d)), X(max(d))], [y, y], color=colour, lw=3, zorder=3, alpha=0.55)
+            ax.plot([X(v) for v in d], [y] * len(d), "o", ms=17, color=colour, zorder=4)
+            label = (f"+{min(d):.1f} to +{max(d):.1f}" if above
+                     else f"{min(d):.1f} to {max(d):.1f}")
+            right = max(max(d), 0)
+        ax.text(X(right) + 0.30, y, label, fontsize=34, fontweight="bold",
                 color=colour, family=SANS, va="center", ha="left")
 
 
 out = card(
     out=str(pathlib.Path(__file__).parent / "social-preview.png"),
     accent="#8250df", badge="Z",
-    kicker="REPRODUCTION  ·  ZDTaichu5.0-9B on one RTX 4090",
-    headline="One card number above, one below",
-    evidence="how far four estimators land from the card",
+    kicker="REPRODUCTION  ·  ZDTaichu5.0-9B",
+    headline="One measured, one still estimated",
+    evidence="CV-Bench measured; MathVista still estimated",
     chart=chart,
     footer="github.com/GuoCheng24/taichu-eval-reproduction",
     headline_size=44,
 )
 print(f"written {pathlib.Path(out).name}  "
-      f"CV {min(ROWS[0][1]):.2f}-{max(ROWS[0][1]):.2f} vs {ROWS[0][2]}  "
-      f"MV {min(ROWS[1][1]):.2f}-{max(ROWS[1][1]):.2f} vs {ROWS[1][2]}")
+      f"CV measured {FULL_CV['accuracy_pct']:.2f} "
+      f"[{FULL_CV['ci_pct'][0]:.2f}, {FULL_CV['ci_pct'][1]:.2f}] vs {ROWS[0][2]}  "
+      f"MV estimated {min(ROWS[1][1]):.2f}-{max(ROWS[1][1]):.2f} vs {ROWS[1][2]}")

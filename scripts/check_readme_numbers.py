@@ -253,6 +253,10 @@ def main() -> int:
         )
 
     fresh = representativeness.compute()
+    full_cv = load("metrics_fullset_cvbench.json")   # load() is relative to results/
+    if full_cv is None:
+        sys.exit("results/metrics_fullset_cvbench.json is missing; the page's "
+                 "headline measurement has nothing behind it")
     if load("representativeness.json") != fresh:
         print(
             "  results/representativeness.json is stale -- rerun scripts/representativeness.py"
@@ -345,36 +349,42 @@ def main() -> int:
 
     # ---- the sentences the tables support ----
     def vals(pattern, where=readme):
-        m = re.search(pattern, where)
+        """Match a sentence regardless of where it happens to wrap.
+
+        These patterns used literal spaces and literal newlines, so rewrapping
+        a paragraph broke four checks at once and the guard reported the page
+        as disagreeing with results/ when only the line breaks had moved. A
+        guard that fails on reflow is a guard people start ignoring.
+        """
+        m = re.search(re.sub(r"(?:\\n|[ ])+", r"\\s+", pattern), where)
         return tuple(float(g) for g in m.groups()) if m else None
 
     cv_vals = [e["value"] for e in fresh["cvbench"]["estimators"].values()]
     mv_vals = [e["value"] for e in fresh["mathvista"]["estimators"].values()]
     sentences = [
+        # CV-Bench is no longer estimated on this page: it is measured, and the
+        # estimators are reported as errors against that measurement. So these
+        # check the sentences that are actually there.
         (
-            "the CV-Bench range",
-            vals(r"full set at " + NUM + r"% to " + NUM + "%"),
-            (min(cv_vals), max(cv_vals)),
+            "the CV-Bench measurement",
+            vals(r"budget, \*\*" + NUM + r"%\*\*"),
+            (full_cv["accuracy_pct"],),
         ),
         (
-            "the CV-Bench margin above the card",
-            vals(r"which is " + NUM + r" to " + NUM + r" points \*above\*"),
-            (
-                min(
-                    abs(x)
-                    for x in (
-                        fresh["cvbench"]["shortfall_min"],
-                        fresh["cvbench"]["shortfall_max"],
-                    )
-                ),
-                max(
-                    abs(x)
-                    for x in (
-                        fresh["cvbench"]["shortfall_min"],
-                        fresh["cvbench"]["shortfall_max"],
-                    )
-                ),
-            ),
+            "the CV-Bench interval",
+            vals(r"\*\*\[" + NUM + r", " + NUM + r"\]\*\*"),
+            tuple(full_cv["ci_pct"]),
+        ),
+        (
+            "the CV-Bench distance from the card",
+            vals(r"\+" + NUM + r" points away"),
+            (abs(full_cv["accuracy_pct"] - full_cv["card"]),),
+        ),
+        (
+            "the estimators' signed errors",
+            vals(r"by \+" + NUM + r" to \+" + NUM + r" points"),
+            (min(e["signed_error"] for e in full_cv["estimators"].values()),
+             max(e["signed_error"] for e in full_cv["estimators"].values())),
         ),
         (
             "the MathVista range",
