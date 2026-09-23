@@ -1,0 +1,23 @@
+{
+ "n_items": 100,
+ "n_runs": 10,
+ "runs_same_order": 5,
+ "runs_permuted": 5,
+ "accuracy_pct_per_run": [
+  82.0,
+  82.0,
+  82.0,
+  82.0,
+  82.0,
+  82.0,
+  82.0,
+  82.0,
+  82.0,
+  82.0
+ ],
+ "accuracy_spread_points": 0.0,
+ "items_with_unstable_extracted_text": [
+  "641"
+ ],
+ "items_with_unstable_scored_outcome": []
+}
