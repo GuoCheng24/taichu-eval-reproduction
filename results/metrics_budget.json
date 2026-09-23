@@ -1,0 +1,46 @@
+{
+ "note": "Budget arms T-A and T-B, PREREG_budget.md. Numbers to disk before any sentence.",
+ "extractor": "llm_ok field, the same extractor the published subsample used",
+ "published_3072": {
+  "n": 100,
+  "budget": 3072,
+  "llm_correct": 82,
+  "accuracy": 0.82,
+  "unclosed": 11,
+  "unclosed_credited": 5,
+  "at_cap": 14,
+  "accuracy_truncated_as_wrong": 0.77
+ },
+ "TA_3072": {
+  "n": 100,
+  "budget": 3072,
+  "llm_correct": 79,
+  "accuracy": 0.79,
+  "unclosed": 15,
+  "unclosed_credited": 5,
+  "at_cap": 19,
+  "accuracy_truncated_as_wrong": 0.74
+ },
+ "TB_8192": {
+  "n": 100,
+  "budget": 8192,
+  "llm_correct": 85,
+  "accuracy": 0.85,
+  "unclosed": 2,
+  "unclosed_credited": 0,
+  "at_cap": 2,
+  "accuracy_truncated_as_wrong": 0.85
+ },
+ "control_TA_vs_published": {
+  "n": 100,
+  "outcome_identical": 95,
+  "tokens_identical": 47,
+  "note": "same budget, same items, same decoding; a different accelerator and a different environment"
+ },
+ "contrast_TB_vs_TA": {
+  "n": 100,
+  "outcome_identical": 94,
+  "tokens_identical": 81,
+  "points": 5.999999999999995
+ }
+}
