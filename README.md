@@ -17,11 +17,28 @@ rest produces. No estimator is preferred retrospectively for having come closest
 **0 of 2,638** reasoning blocks failed to close and **0** generations reached the cap, so there is
 one scoring rather than two.
 
-**MathVista is not excluded, and does not reach the card under any reading:** four estimates span
-77.20% to 82.00% against 84.50 — short by 2.50 to 7.30 points — and 84.50 lies inside all four
-intervals. One hundred items cannot settle that, and this page does not claim they do. **The
-full-set arm is running**; when it lands it will supersede these four the way the CV-Bench
-measurement superseded its own, whichever way it comes out.
+**MathVista is measured too, and its verdict turns on 37 truncated generations.** All 1,000 items,
+thinking on, 8,192 tokens, answers pulled out by the LLM extractor: **82.40%**, exact 95% interval
+**[79.90, 84.71]**, which **contains** the card's 84.50 — 2.10 points below it. But **37 of the
+1,000 never closed their reasoning block** (all 37 of them among the 40 that hit the cap), and the
+extractor credits **16** of those as correct. Scored the other way, with an unclosed block counted
+as no answer, the same run is **80.80% [78.22, 83.20]**, and 84.50 is **outside** that interval.
+
+Both are reported because the pre-registration says so, and because the difference between them is
+the whole verdict: whether this reproduction reaches MathVista's card number depends on how sixteen
+truncated generations are counted, not on the model. That is the same phenomenon the budget arms
+found at 3,072 tokens, smaller but not gone at 8,192.
+
+The four estimates this page previously led with — 77.20% to 82.00% — are superseded. All four
+intervals contain 82.40 and all four point values are **low**, by −0.40 to −5.20 points, which is
+the opposite direction to CV-Bench's. No estimator is preferred retrospectively for having come
+closest.
+
+**The determinism control the budget arms lacked is now in hand.** The 100 subsample items sit
+inside the full-set run at the same budget as arm T-B, and across the two runs all 100 are
+identical in token count, in generated text and in scored outcome — exact McNemar p = 1.000. The
+full set was generated as four shards and the subsample as a single job, so that is reproducibility
+across a different batch layout, not merely a repeat.
 
 Off the card's protocol both numbers are far lower, and that part of the gap is the protocol rather
 than the weights.
@@ -44,6 +61,8 @@ than the weights.
 | MathVista testmini | thinking off, 512 tokens, LLM-extracted | 1,000 (all) | 66.70% | [63.7, 69.6] | 84.50 |
 | MathVista testmini | thinking off, 2,048 tokens, LLM-extracted | 1,000 (all) | 73.20% | [70.4, 75.9] | 84.50 |
 | MathVista testmini, same items, paired | thinking off 2,048 / **thinking on** 3,072, LLM-extracted | 100 (fixed random subset) | 78.0% / **82.0%** | [73.3, 88.3] for thinking on | 84.50 |
+| **MathVista testmini, thinking on, full set** | **8,192-token budget, LLM-extracted** | **1,000 (all)** | **82.40%** | **[79.90, 84.71]** (Clopper–Pearson) | 84.50 |
+| MathVista testmini, same run, unclosed counted as no answer | 8,192-token budget, LLM-extracted | 1,000 (all) | 80.80% | [78.22, 83.20] | 84.50 |
 
 The two subsample rows are unbiased estimates of the full-set numbers, but they are the widest
 ones on this page and they ignore what thinking off already measured on every item. The section

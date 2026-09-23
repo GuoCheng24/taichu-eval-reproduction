@@ -1,0 +1,75 @@
+{
+ "benchmark": "mathvista",
+ "scored_on": "llm_ok",
+ "n": 1000,
+ "correct": 824,
+ "accuracy_pct": 82.4,
+ "ci_pct": [
+  79.89534872821933,
+  84.7121710383628
+ ],
+ "card": 84.5,
+ "interval_contains_card": true,
+ "budget": 8192,
+ "unclosed": 37,
+ "at_cap": 40,
+ "accuracy_unclosed_as_wrong_pct": 80.8,
+ "ci_unclosed_as_wrong_pct": [
+  78.21951822437165,
+  83.19766825285126
+ ],
+ "estimators": {
+  "difference": {
+   "value": 77.2,
+   "ci": [
+    69.8,
+    84.6
+   ],
+   "signed_error": -5.200000000000003,
+   "interval_contains_measured": true
+  },
+  "direct": {
+   "value": 82.0,
+   "ci": [
+    74.8,
+    89.2
+   ],
+   "signed_error": -0.4000000000000057,
+   "interval_contains_measured": true
+  },
+  "post_stratified": {
+   "value": 79.75,
+   "ci": [
+    72.7,
+    86.8
+   ],
+   "signed_error": -2.6500000000000057,
+   "interval_contains_measured": true
+  },
+  "regression": {
+   "value": 79.75,
+   "ci": [
+    73.6,
+    85.9
+   ],
+   "signed_error": -2.6500000000000057,
+   "interval_contains_measured": true
+  }
+ },
+ "estimators_containing_measured": 4,
+ "signed_error_range": [
+  -5.200000000000003,
+  -0.4000000000000057
+ ],
+ "overlap": {
+  "n": 100,
+  "same_settings": true,
+  "tokens_identical": 100,
+  "outcome_identical": 100,
+  "shared_suffix_chars": 800,
+  "suffix_identical": 100,
+  "b": 0,
+  "c": 0,
+  "mcnemar_p": 1.0
+ }
+}

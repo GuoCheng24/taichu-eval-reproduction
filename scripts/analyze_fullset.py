@@ -27,21 +27,31 @@ except ImportError:                                  # a sibling checkout, not i
 # exists so this runs from a checkout sitting next to it. A hard-coded absolute
 # path would be both unreproducible and a private path in a public file.
 
+# `score` is the field the card's protocol scores on. CV-Bench is
+# multiple-choice and scored by rule; MathVista's answers are pulled out by an
+# LLM extractor, so its scored file is the extractor's output and its field is
+# `llm_ok`. Reading `ok` there would silently report the rule-based number -
+# 60.00% against the extractor's - under a heading that says otherwise.
 BENCH = {
     "cvbench": {"full": "results/cvbench_think_on_FCV.jsonl",
                 "subset": "results/cvbench_think_on_sub150.jsonl",
                 "subset_budget": 3072, "full_budget": 8192,
-                "key": "cvbench"},
-    "mathvista": {"full": "results/mathvista_think_on_FMV.jsonl",
-                  "subset": "results/mathvista_think_on_sub100_TB8192.jsonl",
+                "key": "cvbench", "score": "ok"},
+    "mathvista": {"full": "results/mathvista_think_on_FMV_llmext.json",
+                  "subset": "results/mathvista_think_on_sub100_TB8192_llmext.json",
                   "subset_budget": 8192, "full_budget": 8192,
-                  "key": "mathvista"},
+                  "key": "mathvista", "score": "llm_ok"},
 }
 
 
 def rows(path):
-    with open(os.path.join(ROOT, path), encoding="utf-8") as fh:
-        return [json.loads(ln) for ln in fh if ln.strip()]
+    """`.jsonl` one object per line, `.json` a single array - the extractor
+    writes the second."""
+    full = os.path.join(ROOT, path)
+    with open(full, encoding="utf-8") as fh:
+        if path.endswith(".jsonl"):
+            return [json.loads(ln) for ln in fh if ln.strip()]
+        return json.load(fh)
 
 
 def main(argv):
@@ -54,10 +64,11 @@ def main(argv):
         rep = json.load(fh)[cfg["key"]]
 
     n = len(full)
-    k = sum(1 for r in full if r["ok"])
+    sc = cfg["score"]
+    k = sum(1 for r in full if r[sc])
     lo, hi = clopper_pearson(k, n)
     card = rep["card"]
-    out = {"benchmark": name, "n": n, "correct": k, "accuracy_pct": 100 * k / n,
+    out = {"benchmark": name, "scored_on": sc, "n": n, "correct": k, "accuracy_pct": 100 * k / n,
            "ci_pct": [100 * lo, 100 * hi], "card": card,
            "interval_contains_card": 100 * lo <= card <= 100 * hi,
            "budget": cfg["full_budget"]}
@@ -78,7 +89,7 @@ def main(argv):
     print(f"  reasoning block never closed: {len(unclosed)} of {n}")
     print(f"  generation hit the cap:       {len(at_cap)} of {n}")
     if unclosed:
-        k2 = sum(1 for r in full if r["ok"] and r.get("thought", True))
+        k2 = sum(1 for r in full if r[sc] and r.get("thought", True))
         lo2, hi2 = clopper_pearson(k2, n)
         out["accuracy_unclosed_as_wrong_pct"] = 100 * k2 / n
         out["ci_unclosed_as_wrong_pct"] = [100 * lo2, 100 * hi2]
@@ -118,7 +129,7 @@ def main(argv):
     pairs = [(s, byid[s["id"]]) for s in sub if s["id"] in byid]
     if pairs:
         tok = sum(1 for a, b in pairs if a["ntok"] == b["ntok"])
-        same = sum(1 for a, b in pairs if a["ok"] == b["ok"])
+        same = sum(1 for a, b in pairs if a[sc] == b[sc])
         # `text` is stored as a SUFFIX of the generation - text[-800:] now,
         # text[-300:] when the subsample was run - so comparing the fields
         # whole says only that the logging changed. The shared suffix is the
@@ -126,8 +137,8 @@ def main(argv):
         m = min(min(len(a.get("text", "")) for a, _ in pairs),
                 min(len(b.get("text", "")) for _, b in pairs))
         txt = sum(1 for a, b in pairs if a.get("text", "")[-m:] == b.get("text", "")[-m:])
-        bb = sum(1 for a, b in pairs if a["ok"] and not b["ok"])
-        cc = sum(1 for a, b in pairs if b["ok"] and not a["ok"])
+        bb = sum(1 for a, b in pairs if a[sc] and not b[sc])
+        cc = sum(1 for a, b in pairs if b[sc] and not a[sc])
         out["overlap"] = {"n": len(pairs), "same_settings": same_settings,
                           "tokens_identical": tok, "outcome_identical": same,
                           "shared_suffix_chars": m, "suffix_identical": txt, "b": bb, "c": cc,

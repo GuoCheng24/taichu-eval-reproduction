@@ -7,3 +7,7 @@ results/img/
 # reproduces them exactly, and it refuses if a shard is short or disagrees.
 results/cvbench_think_on_FCV.jsonl
 results/mathvista_think_on_FMV.jsonl
+
+# `groundwork watch` bookkeeping: pids, local paths and a raw log. Machine
+# state, not a result - and the flag file is meant to be read on THIS machine.
+archive/runs/

@@ -254,9 +254,10 @@ def main() -> int:
 
     fresh = representativeness.compute()
     full_cv = load("metrics_fullset_cvbench.json")   # load() is relative to results/
-    if full_cv is None:
-        sys.exit("results/metrics_fullset_cvbench.json is missing; the page's "
-                 "headline measurement has nothing behind it")
+    full_mv = load("metrics_fullset_mathvista.json")
+    if full_cv is None or full_mv is None:
+        sys.exit("a results/metrics_fullset_*.json is missing; the page's "
+                 "headline measurements have nothing behind them")
     if load("representativeness.json") != fresh:
         print(
             "  results/representativeness.json is stale -- rerun scripts/representativeness.py"
@@ -359,6 +360,18 @@ def main() -> int:
         m = re.search(re.sub(r"(?:\\n|[ ])+", r"\\s+", pattern), where)
         return tuple(float(g) for g in m.groups()) if m else None
 
+    def after(marker, where=readme):
+        """The page from `marker` onwards.
+
+        Both benchmarks state an interval as `**[lo, hi]**`, so a bare search
+        finds whichever comes first. Anchoring on the paragraph is clearer than
+        writing the expected digits into the pattern, which is what the first
+        version of this check did.
+        """
+        i = where.find(marker)
+        return where[i:] if i >= 0 else ""
+
+    mv_para = after("**MathVista is measured too")
     cv_vals = [e["value"] for e in fresh["cvbench"]["estimators"].values()]
     mv_vals = [e["value"] for e in fresh["mathvista"]["estimators"].values()]
     sentences = [
@@ -386,15 +399,29 @@ def main() -> int:
             (min(e["signed_error"] for e in full_cv["estimators"].values()),
              max(e["signed_error"] for e in full_cv["estimators"].values())),
         ),
+        # MathVista is measured now too, and reported under both scorings
+        # because 37 generations never closed their reasoning block.
         (
-            "the MathVista range",
-            vals(r"estimates span " + NUM + r"% to " + NUM + "%"),
-            (min(mv_vals), max(mv_vals)),
+            "the MathVista measurement",
+            vals(r"extractor: \*\*" + NUM + r"%\*\*", mv_para),
+            (full_mv["accuracy_pct"],),
         ),
         (
-            "the MathVista shortfall",
-            vals(r"short by " + NUM + r" to\n" + NUM + r" points"),
-            (fresh["mathvista"]["shortfall_min"], fresh["mathvista"]["shortfall_max"]),
+            "the MathVista interval",
+            vals(r"\*\*\[" + NUM + r", " + NUM + r"\]\*\*", mv_para),
+            tuple(full_mv["ci_pct"]),
+        ),
+        (
+            "the MathVista strict scoring",
+            vals(r"\*\*" + NUM + r"% \[" + NUM + r", " + NUM + r"\]\*\*", mv_para),
+            (full_mv["accuracy_unclosed_as_wrong_pct"],
+             *full_mv["ci_unclosed_as_wrong_pct"]),
+        ),
+        (
+            "the MathVista estimators' signed errors",
+            vals("by \u2212" + NUM + r" to \u2212" + NUM + r" points", mv_para),
+            (abs(max(e["signed_error"] for e in full_mv["estimators"].values())),
+             abs(min(e["signed_error"] for e in full_mv["estimators"].values()))),
         ),
         (
             "the correlations",

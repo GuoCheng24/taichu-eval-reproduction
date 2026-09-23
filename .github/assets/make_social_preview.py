@@ -28,8 +28,27 @@ def values(key):
 # still running, so that row is still the four estimators. Showing both as
 # estimators would be a card that disagrees with its own README.
 FULL_CV = json.loads((ROOT / "results/metrics_fullset_cvbench.json").read_text())
-ROWS = [("CV-Bench", *values("cvbench")), ("MathVista", *values("mathvista"))]
-LO, HI = -8.6, 6.4                       # points away from the card number, shared axis
+FULL_MV = json.loads((ROOT / "results/metrics_fullset_mathvista.json").read_text())
+
+
+def measured(d, key="accuracy_pct", ci="ci_pct"):
+    """(point, lo, hi) as distances from the card number."""
+    c = d["card"]
+    return d[key] - c, d[ci][0] - c, d[ci][1] - c
+
+
+# Three rows, because MathVista has two scorings and they disagree about the
+# card: 37 of its 1,000 generations never closed their reasoning block, the
+# extractor credits 16 of them, and counting those the other way moves the
+# interval off the card line. A card that showed one scoring would be picking
+# the verdict.
+ROWS = [
+    ("CV-Bench", measured(FULL_CV)),
+    ("MathVista", measured(FULL_MV)),
+    ("strict scoring", measured(FULL_MV, "accuracy_unclosed_as_wrong_pct",
+                                    "ci_unclosed_as_wrong_pct")),
+]
+LO, HI = -7.6, 3.4                       # points away from the card number, shared axis
 
 
 def chart(ax, accent):
@@ -46,45 +65,31 @@ def chart(ax, accent):
 
     # the line stops clear of its own label: a vertical rule under text
     # passed every check until the rule test learned about vertical rules
-    ax.plot([X(0), X(0)], [1.05, 3.34], color="#17181a", lw=3, zorder=2)
-    ax.text(X(0), 3.62, "the card number", fontsize=34, color="#17181a", family=SANS,
+    ax.plot([X(0), X(0)], [0.80, 3.30], color="#17181a", lw=3, zorder=2)
+    ax.text(X(0), 3.56, "the card number", fontsize=34, color="#17181a", family=SANS,
             ha="center")
-    for i, (name, vals, cardv) in enumerate(ROWS):
-        y = 2.80 - i * 1.12
+    for i, (name, (point, lo, hi)) in enumerate(ROWS):
+        y = 2.92 - i * 0.92
+        # green when the interval still covers the card number, orange when it
+        # does not - the only distinction this card is making
+        colour = "#1a7f37" if lo <= 0 <= hi else "#bc4c00"
         ax.text(x0 - 0.24, y, name, fontsize=34, color="#17181a", family=SANS,
                 ha="right", va="center")
-        if name == "CV-Bench":
-            point = FULL_CV["accuracy_pct"] - cardv
-            lo, hi = (v - cardv for v in FULL_CV["ci_pct"])
-            colour = "#1a7f37"
-            ax.plot([X(lo), X(hi)], [y, y], color=colour, lw=3, zorder=3, alpha=0.55)
-            ax.plot([X(point)], [y], "o", ms=22, color=colour, zorder=4)
-            label = f"+{point:.2f}"
-            right = max(hi, point, 0)
-        else:
-            above = min(vals) > cardv
-            colour = "#1a7f37" if above else "#bc4c00"
-            d = [v - cardv for v in vals]
-            ax.plot([X(min(d)), X(max(d))], [y, y], color=colour, lw=3, zorder=3, alpha=0.55)
-            ax.plot([X(v) for v in d], [y] * len(d), "o", ms=17, color=colour, zorder=4)
-            label = (f"+{min(d):.1f} to +{max(d):.1f}" if above
-                     else f"{min(d):.1f} to {max(d):.1f}")
-            right = max(max(d), 0)
-        ax.text(X(right) + 0.30, y, label, fontsize=34, fontweight="bold",
-                color=colour, family=SANS, va="center", ha="left")
+        ax.plot([X(lo), X(hi)], [y, y], color=colour, lw=3, zorder=3, alpha=0.55)
+        ax.plot([X(point)], [y], "o", ms=20, color=colour, zorder=4)
+        ax.text(X(max(hi, 0)) + 0.26, y, f"{point:+.2f}", fontsize=34,
+                fontweight="bold", color=colour, family=SANS, va="center", ha="left")
 
 
 out = card(
     out=str(pathlib.Path(__file__).parent / "social-preview.png"),
     accent="#8250df", badge="Z",
     kicker="REPRODUCTION  ·  ZDTaichu5.0-9B",
-    headline="One measured, one still estimated",
-    evidence="CV-Bench measured; MathVista still estimated",
+    headline="One verdict rests on 37 truncations",
+    evidence="measured minus the card, exact 95% intervals",
     chart=chart,
     footer="github.com/GuoCheng24/taichu-eval-reproduction",
     headline_size=44,
 )
-print(f"written {pathlib.Path(out).name}  "
-      f"CV measured {FULL_CV['accuracy_pct']:.2f} "
-      f"[{FULL_CV['ci_pct'][0]:.2f}, {FULL_CV['ci_pct'][1]:.2f}] vs {ROWS[0][2]}  "
-      f"MV estimated {min(ROWS[1][1]):.2f}-{max(ROWS[1][1]):.2f} vs {ROWS[1][2]}")
+print("written " + pathlib.Path(out).name + "  "
+      + "  ".join(f"{n.strip()} {p:+.2f} [{lo:+.2f},{hi:+.2f}]" for n, (p, lo, hi) in ROWS))

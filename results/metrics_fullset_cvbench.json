@@ -1,5 +1,6 @@
 {
  "benchmark": "cvbench",
+ "scored_on": "ok",
  "n": 2638,
  "correct": 2302,
  "accuracy_pct": 87.26307808946171,
