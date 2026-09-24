@@ -185,6 +185,14 @@ turns thinking on by default, so `--thinking off` renders the prompt with `enabl
 same processor path. `results/` holds every per-item record (gold, prediction, whether the model closed its
 thinking block, token count, the tail of the response) so any row above can be re-derived.
 
+## Other things from the same desk
+
+- [ifeval-reproduction](https://github.com/GuoCheng24/ifeval-reproduction) — reproducing a published IFEval score under a pre-registration chain, and the paired test that killed my own conclusion
+- [batch-logprob-gap](https://github.com/GuoCheng24/batch-logprob-gap) — in low-precision training the same token gets a different log probability depending on its batch shape — measured, with what it does and does not do to GRPO
+- [groundwork](https://github.com/GuoCheng24/groundwork) — a research pipeline for coding agents whose first stage can return NO-GO; on PyPI as `groundwork-research`
+
+More at [github.com/GuoCheng24](https://github.com/GuoCheng24).
+
 ## License
 
 MIT.
